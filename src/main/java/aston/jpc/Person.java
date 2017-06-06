@@ -1,79 +1,67 @@
 package aston.jpc;
 
-
 public abstract class Person {
     protected Simulation simulation;
     final int id;
     int weight;
-    private Floor currentFloor;
+    Floor currentFloor;
     Floor requestedFloor;
-    boolean lowerFloors, upperFloors, inElevator, canEnterBuilding, waiting;
+    boolean lowerFloors, upperFloors, inElevator, waiting = false, firstRequest = true;
 
     public Person(int id, Simulation simulation, Floor currentFloor) {
         this.simulation = simulation;
         this.id = id;
         this.currentFloor = currentFloor;
-        this.waiting = true;
-    }
-
-//    abstract void enterBuilding();
-
-//    abstract void exitBuilding();
-
-    void decide(Simulation simulation) {
-        int numFloors, numFloorsStart;
-        if (!this.waiting) {
-            if (simulation.dice.nextFloat() < simulation.p) {
-                if (lowerFloors && upperFloors) {
-                    numFloors = 6;
-                    numFloorsStart = 1;
-                } else if (lowerFloors) {
-                    numFloors = 3;
-                    numFloorsStart = 1;
-                } else {
-                    numFloors = 3;
-                    numFloorsStart = 4;
-                }
-
-                // Get new floor
-                Floor newFloor = simulation.getBuilding().getFloors().get((int) (Math.random() * numFloors) + numFloorsStart);
-
-                // Send request
-                requestFloor(newFloor);
-
-                // Add to current floor queue
-                currentFloor.standardQueue.add(this);
-
-                simulation.getBuilding().getElevator().requests.add(this);
-            }
+        this.currentFloor.addPerson(this);
+        if (this instanceof Employee || this instanceof Developer) {
+            decide();
         }
     }
 
-    /**
-     * Sends a request to the elevator.
-     *
-     * @param floor an int that gives the floor number that the person wants to travel to.
-     */
-    // @todo Request floor method
-    private void requestFloor(Floor floor) {
+    void enterBuilding() {
+        simulation.file.println("[Tick " + simulation.tick + "] Person " + this.id + " (" + this.getClass() + ") has entered the building");
+        decide();
+    }
+
+    void exitBuilding() {
+        requestFloor(this.simulation.getBuilding().getFloors().get(0));
+    }
+
+    abstract void decide();
+
+    Floor calculateNewFloor() {
+        int newFloorNum;
+
+        if (this.lowerFloors && this.upperFloors) {
+            newFloorNum = simulation.dice.nextInt(6);
+        } else if (this.lowerFloors) {
+            newFloorNum = simulation.dice.nextInt(3);
+        } else {
+            newFloorNum = simulation.dice.nextInt(3) + 3;
+        }
+
+        Floor newFloor = simulation.getBuilding().getFloors().get(newFloorNum);
+
+        while (newFloor.equals(this.currentFloor) && !(this instanceof Client)) {
+            newFloor = calculateNewFloor();
+        }
+
+        return newFloor;
+    }
+
+    void requestFloor(Floor floor) {
+        this.firstRequest = false;
         this.requestedFloor = floor;
+        this.currentFloor.standardQueue.add(this);
+        this.simulation.getBuilding().getElevator().requests.add(this);
         this.waiting = true;
     }
 
-    // @todo enter elevator method
     void enterElevator() {
-        this.currentFloor.standardQueue.remove();
+        this.currentFloor.standardQueue.remove(this);
         this.currentFloor.removePerson(this);
-        this.waiting = false;
         this.inElevator = true;
     }
 
-    // @todo exit elevator method
-    void exitElevator(Floor newFloor) {
-        this.currentFloor = newFloor;
-        this.currentFloor.addPerson(this);
-        this.requestedFloor = null;
-        this.inElevator = false;
-    }
-
+    abstract void exitElevator(Floor newFloor);
 }

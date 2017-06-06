@@ -8,18 +8,11 @@ class Building {
     private ArrayList<Floor> floors;
     private Elevator elevator;
 
-    /**
-     * @param numEmp
-     * @param numDev
-     */
-    Building(int numEmp, int numDev, Simulation simulation) {
+    Building(Simulation simulation) {
         this.simulation = simulation;
         this.floors = new ArrayList<Floor>();
-        createFloors();
+        addFloors();
         this.people = new ArrayList<Person>();
-        addEmployees(numEmp);
-        addDevelopers(numDev);
-        addAllToFirstFloor();
         this.elevator = new Elevator(floors.get(0), this.simulation);
     }
 
@@ -38,7 +31,7 @@ class Building {
     /**
      * @param amount
      */
-    private void addEmployees(int amount) {
+    void addEmployees(int amount) {
         for (int i = 0; i < amount; i++) {
             people.add(new Employee(people.size() + 1, this.simulation, this.floors));
         }
@@ -47,25 +40,39 @@ class Building {
     /**
      * @param amount
      */
-    private void addDevelopers(int amount) {
+    void addDevelopers(int amount) {
         for (int i = 0; i < amount; i++) {
             people.add(new Developer(people.size() + 1, this.simulation, this.floors));
         }
     }
 
+    void addClient() {
+        people.add(new Client(people.size() + 1, this.simulation, this.floors));
+    }
+
+    void addMaintenanceCrew() {
+        people.add(new MaintenanceCrew(people.size() + 1, this.simulation, this.floors));
+    }
+
+    void removePerson(Person person) {
+        people.remove(person);
+    }
+
     /**
      *
      */
-    private void createFloors() {
+    private void addFloors() {
         for (int i = 0; i < 6; i++) {
             this.floors.add(new Floor(i + 1));
         }
     }
 
-    private void addAllToFirstFloor() {
-        for (Person person : people) {
-            this.floors.get(0).addPerson(person);
-            this.floors.get(0).standardQueue.add(person);
+    void decide() {
+        if (simulation.dice.nextFloat() < this.simulation.q) {
+            addClient();
+        }
+        if (simulation.dice.nextFloat() < 0.005) {
+            addMaintenanceCrew();
         }
     }
 }

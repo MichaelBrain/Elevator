@@ -1,5 +1,6 @@
 package aston.jpc;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
@@ -48,7 +49,10 @@ public class Simulation {
     }
 
     private boolean prepare(int numEmp, int numDev) {
-        this.building = new Building(numEmp, numDev, this);
+        this.building = new Building(this);
+
+        this.building.addEmployees(numEmp);
+        this.building.addDevelopers(numDev);
 
         return true;
     }
@@ -56,7 +60,7 @@ public class Simulation {
     private boolean prepareFile() {
         try {
             this.fileName = "SimulationResult-" + new Date().getTime() + ".txt";
-            this.file = new PrintWriter(fileName, "UTF-8");
+            this.file = new PrintWriter(new FileWriter(fileName, true));
             this.file.println("*** SIMULATION STARTED ***");
         } catch (IOException e) {
             return false;
@@ -68,13 +72,15 @@ public class Simulation {
     private Boolean run() {
         // Begin 8 hour day
         // Employees and Developers begin at ground level and immediately decide a floor.
-        while (tick < 2880) {
+        while (tick < 28800) {
             // People decide
-            for (Person person : building.getPeople()) {
-                person.decide(this);
+            for (int i = 0; i < building.getPeople().size(); i++) {
+                Person person = building.getPeople().get(i);
+                person.decide();
             }
             // Elevator decides
             building.getElevator().decide();
+            building.decide();
             // Go to next tick
             tick++;
         }
