@@ -17,8 +17,8 @@ public class Main {
         userInterface.run();
     }
 
-    void start(int numEmployees, int numDevelopers, float p, float q) {
-        Simulation simulationResult = new Simulation(numEmployees, numDevelopers, p, q);
+    void start(int numEmployees, int numDevelopers, float p, float q, long seed) {
+        Simulation simulationResult = new Simulation(numEmployees, numDevelopers, p, q, seed);
         userInterface.complete(simulationResult);
     }
 }

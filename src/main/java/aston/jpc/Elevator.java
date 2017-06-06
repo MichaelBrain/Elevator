@@ -11,6 +11,7 @@ public class Elevator {
     private boolean loadingPeople = false;
     private boolean readyToDepart = false;
     private boolean travellingUpwards = true;
+    private int currentWeight = 0;
     private Floor currentFloor;
     private ArrayList<Person> occupants;
     ConcurrentLinkedQueue<Person> requests;
@@ -61,6 +62,7 @@ public class Elevator {
                     simulation.file.println("[Tick " + simulation.tick + "] Person " + person.id + " (" + person.getClass() + ") has exited the elevator");
                     person.exitElevator(currentFloor);
                     occupants.remove(person);
+                    this.currentWeight -= person.weight;
                     this.requests.remove(person);
                     i--;
                 }
@@ -69,9 +71,14 @@ public class Elevator {
 
         for (Person person : currentFloor.standardQueue) {
             if (this.occupants.size() < 4) {
-                person.enterElevator();
-                this.occupants.add(person);
-                simulation.file.println("[Tick " + simulation.tick + "] Person " + person.id + " (" + person.getClass() + ") has entered the elevator to floor " + person.requestedFloor.level);
+                if (this.currentWeight + person.weight < 5) {
+                    person.enterElevator();
+                    this.occupants.add(person);
+                    this.currentWeight += person.weight;
+                    simulation.file.println("[Tick " + simulation.tick + "] Person " + person.id + " (" + person.getClass() + ") has entered the elevator to floor " + person.requestedFloor.level);
+                } else {
+                    simulation.file.println("[Tick " + simulation.tick + "] Not enough space in the elevator for Person " + person.id + " (" + person.getClass() + ")");
+                }
             }
         }
     }
@@ -85,9 +92,11 @@ public class Elevator {
         if (travellingUpwards) {
             if (currentFloor.level < 6 && !this.occupants.isEmpty() || currentFloor.level < 6 && !this.requests.isEmpty()) {
                 currentFloor = simulation.getBuilding().getFloors().get(currentFloor.level);
-            } else {
+            } else if(currentFloor.level != 1) {
                 currentFloor = simulation.getBuilding().getFloors().get(currentFloor.level - 2);
                 travellingUpwards = false;
+            } else {
+                action = "is resting at";
             }
         } else {
             if (currentFloor.level > 1) {

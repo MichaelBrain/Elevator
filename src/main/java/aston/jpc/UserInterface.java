@@ -55,9 +55,11 @@ class UserInterface {
 
         float q = getFloatInput("q");
 
+        long seed = getLongInput("Seed");
+
         System.out.println("Running simulation...");
 
-        app.start(numEmployees, numDevelopers, p, q);
+        app.start(numEmployees, numDevelopers, p, q, seed);
     }
 
     void complete(Simulation simulationResult) {
@@ -94,5 +96,15 @@ class UserInterface {
             in.next();
         }
         return in.nextFloat();
+    }
+
+    private long getLongInput(String entity) {
+        System.out.print("Value of " + entity + ": ");
+        while (!in.hasNextLong()) {
+            System.err.println("Please enter a valid decimal number.");
+            System.out.print("Value of " + entity + ": ");
+            in.next();
+        }
+        return in.nextLong();
     }
 }
