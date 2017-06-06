@@ -58,9 +58,10 @@ public class Elevator {
             for (int i = 0; i < occupants.size(); i++) {
                 Person person = occupants.get(i);
                 if (person.requestedFloor.equals(currentFloor)) {
+                    simulation.file.println("[Tick " + simulation.tick + "] Person " + person.id + " (" + person.getClass() + ") has exited the elevator");
                     person.exitElevator(currentFloor);
                     occupants.remove(person);
-                    simulation.file.println("[Tick " + simulation.tick + "] Person " + person.id + " (" + person.getClass() + ") has exited the elevator");
+                    this.requests.remove(person);
                     i--;
                 }
             }
@@ -109,6 +110,9 @@ public class Elevator {
                 }
             }
         }
-        return !this.currentFloor.standardQueue.isEmpty();
+        if (!this.currentFloor.standardQueue.isEmpty()) {
+            return true;
+        }
+        return false;
     }
 }

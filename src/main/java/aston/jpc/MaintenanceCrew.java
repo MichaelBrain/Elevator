@@ -2,32 +2,21 @@ package aston.jpc;
 
 import java.util.ArrayList;
 
-class Client extends Person {
+class MaintenanceCrew extends Person {
     private int timeArrivedAtFloor;
     private int timeInBuilding;
     private boolean exitingBuilding;
 
-    Client(int id, Simulation simulation, ArrayList floors) {
+    MaintenanceCrew(int id, Simulation simulation, ArrayList floors) {
         super(id, simulation, (Floor) floors.get(0));
-        this.lowerFloors = true;
-        this.upperFloors = false;
-        this.weight = 1;
+        this.weight = 4;
         enterBuilding();
         calculateTimeInBuilding();
     }
 
     void decide() {
         if (!this.waiting && this.firstRequest) {
-            // Get new floor
-            Floor newFloor = calculateNewFloor();
-
-            if (newFloor.equals(this.currentFloor)) {
-                this.firstRequest = false;
-                this.waiting = false;
-            } else {
-                // Send request
-                this.requestFloor(newFloor);
-            }
+            this.requestFloor(simulation.getBuilding().getFloors().get(5));
         } else if (!this.waiting) {
             if (timeArrivedAtFloor + timeInBuilding == simulation.tick) {
                 exitingBuilding = true;
@@ -37,7 +26,7 @@ class Client extends Person {
     }
 
     private void calculateTimeInBuilding() {
-        this.timeInBuilding = simulation.dice.nextInt(120) + 60;
+        this.timeInBuilding = simulation.dice.nextInt(120) + 120;
     }
 
     void exitElevator(Floor newFloor) {
