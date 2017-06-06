@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.Random;
 
 public class Simulation {
-    private final int seed = 10;
+    private long seed;
     boolean success;
     String errorMsg;
     float p, q;
@@ -22,9 +22,10 @@ public class Simulation {
 
     private Building building;
 
-    public Simulation(int numEmp, int numDev, float p, float q) {
+    public Simulation(int numEmp, int numDev, float p, float q, long seed) {
         this.p = p;
         this.q = q;
+        this.seed = seed;
         boolean prepareResult = prepare(numEmp, numDev);
         if (prepareResult) {
             boolean prepareFileResult = prepareFile();
