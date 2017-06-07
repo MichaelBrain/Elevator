@@ -2,33 +2,47 @@ package aston.jpc;
 
 import java.util.ArrayList;
 
+/**
+ * A Developer type subclass of Person.
+ */
 class Developer extends Person {
+    /**
+     * @param id int
+     * @param simulation Simulation
+     * @param floors ArrayList
+     */
     Developer(int id, Simulation simulation, ArrayList floors) {
-        super(id, simulation, (Floor) floors.get(0));
-        this.lowerFloors = false;
-        this.upperFloors = true;
-        this.weight = 1;
+        super(id, simulation, (Floor) floors.get(0), 1);
+        setLowerFloors(false);
+        setUpperFloors(true);
     }
 
+    /**
+     * Run every tick to request a new floor if not already requested.
+     */
     void decide() {
-        if (!this.waiting) {
-            if (simulation.dice.nextFloat() < this.simulation.p || this.firstRequest) {
+        if (!isWaiting()) {
+            if (getSimulation().getDice().nextFloat() < getSimulation().getP() || isFirstRequest()) {
                 // Get new floor
                 Floor newFloor = calculateNewFloor();
 
-                if (!newFloor.equals(this.currentFloor)) {
+                if (!newFloor.equals(getCurrentFloor())) {
                     // Send request
-                    this.requestFloor(newFloor);
+                    requestFloor(newFloor);
                 }
             }
         }
     }
 
+    /**
+     * Adds the Developer to the new floor.
+     *
+     * @param newFloor the Floor instance originally requested.
+     */
     void exitElevator(Floor newFloor) {
-        this.currentFloor = newFloor;
-        this.currentFloor.addPerson(this);
-        this.requestedFloor = null;
-        this.waiting = false;
-        this.inElevator = false;
+        setCurrentFloor(newFloor);
+        getCurrentFloor().addPerson(this);
+        setRequestedFloor(null);
+        setWaiting(false);
     }
 }
